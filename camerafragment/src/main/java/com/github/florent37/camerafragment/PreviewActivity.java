@@ -19,13 +19,13 @@ import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
 
-import java.io.File;
-
 import com.github.florent37.camerafragment.configuration.Configuration;
 import com.github.florent37.camerafragment.internal.enums.MediaAction;
 import com.github.florent37.camerafragment.internal.ui.view.AspectFrameLayout;
 import com.github.florent37.camerafragment.internal.utils.ImageLoader;
 import com.github.florent37.camerafragment.internal.utils.Utils;
+
+import java.io.File;
 
 /*
  * Created by memfis on 7/6/16.

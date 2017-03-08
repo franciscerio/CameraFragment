@@ -1,6 +1,7 @@
 package com.github.florent37.camerafragment.sample;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import com.github.florent37.camerafragment.CameraFragment;
 import com.github.florent37.camerafragment.CameraFragmentApi;
+import com.github.florent37.camerafragment.PreviewActivity;
 import com.github.florent37.camerafragment.configuration.Configuration;
 import com.github.florent37.camerafragment.listeners.CameraFragmentControlsAdapter;
 import com.github.florent37.camerafragment.listeners.CameraFragmentResultAdapter;
@@ -88,18 +90,20 @@ public class MainActivity extends AppCompatActivity {
         final CameraFragmentApi cameraFragment = getCameraFragment();
         if (cameraFragment != null) {
             cameraFragment.takePhotoOrCaptureVideo(new CameraFragmentResultAdapter() {
-                @Override
-                public void onVideoRecorded(String filePath) {
-                    Toast.makeText(getBaseContext(), "onVideoRecorded " + filePath, Toast.LENGTH_SHORT).show();
-                }
+                                                       @Override
+                                                       public void onVideoRecorded(String filePath) {
+                                                           Toast.makeText(getBaseContext(), "onVideoRecorded " + filePath, Toast.LENGTH_SHORT).show();
+                                                           Intent intent = PreviewActivity.newIntentVideo(MainActivity.this, filePath);
+                                                           startActivity(intent);
+                                                       }
 
-                @Override
-                public void onPhotoTaken(byte[] bytes, String filePath) {
-                    Toast.makeText(getBaseContext(), "onPhotoTaken " + filePath, Toast.LENGTH_SHORT).show();
-                }
-            },
-            "/storage/self/primary",
-            "photo0");
+                                                       @Override
+                                                       public void onPhotoTaken(byte[] bytes, String filePath) {
+                                                           Toast.makeText(getBaseContext(), "onPhotoTaken " + filePath, Toast.LENGTH_SHORT).show();
+                                                       }
+                                                   },
+                    "/storage/self/primary",
+                    "photo0");
         }
     }
 

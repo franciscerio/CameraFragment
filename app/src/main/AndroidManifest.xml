@@ -9,6 +9,7 @@
 
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -20,16 +21,16 @@
             android:screenOrientation="portrait"
             android:theme="@style/ThemeFullscreen" />
 
-        <activity
-            android:name="com.github.florent37.camerafragment.sample.MainActivityCustoms"
-            android:screenOrientation="portrait"
-            android:theme="@style/ThemeFullscreen" >
-        </activity>
+        <!--<activity-->
+        <!--android:name="com.github.florent37.camerafragment.sample.MainActivityCustoms"-->
+        <!--android:screenOrientation="portrait"-->
+        <!--android:theme="@style/ThemeFullscreen" >-->
+        <!--</activity>-->
 
         <activity
-            android:name="com.github.florent37.camerafragment.sample.MainActivity"
+            android:name="com.github.florent37.camerafragment.sample.ResultActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/ThemeFullscreen" >
+            android:theme="@style/ThemeFullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
