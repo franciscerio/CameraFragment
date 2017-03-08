@@ -29,6 +29,7 @@
 
         <activity
             android:name="com.github.florent37.camerafragment.sample.ResultActivity"
+            android:hardwareAccelerated="true"
             android:screenOrientation="portrait"
             android:theme="@style/ThemeFullscreen">
             <intent-filter>

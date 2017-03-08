@@ -46,7 +46,11 @@ public class VideoPreviewFragment extends Fragment {
 
     private MediaController mediaController = null;
     private MediaPlayer mediaPlayer = null;
+    private OnVideoPlayedListener mListener;
 
+    public interface OnVideoPlayedListener {
+        void onVideoPlayingListener();
+    }
 
     @Nullable
     @Override
@@ -54,6 +58,9 @@ public class VideoPreviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_video_preview, container, false);
         ButterKnife.bind(this, view);
+
+        Log.e(TAG, "PLAY VIDEO onCreateView");
+
 
         textureView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -73,7 +80,36 @@ public class VideoPreviewFragment extends Fragment {
         }
         textureView.setScaleType(ScalableTextureView.ScaleType.FILL);
 
+        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
+                Log.e(TAG, "PLAY VIDEO onSurfaceTextureAvailable");
+                final Surface surface = new Surface(surfaceTexture);
+                showVideoPreview(surface);
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
+                Log.e(TAG, "PLAY VIDEO onSurfaceTextureSizeChanged");
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+                surfaceTexture.release();
+                Log.e(TAG, "PLAY VIDEO onSurfaceTextureDestroyed");
+                return true;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+            }
+        });
+
         return view;
+    }
+
+    public void setOnVideoPlayingListener(OnVideoPlayedListener playingListener) {
+        this.mListener = playingListener;
     }
 
     @Override
@@ -97,6 +133,12 @@ public class VideoPreviewFragment extends Fragment {
         playVideo();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+    }
+
     public void playVideo() {
         if (textureView == null) {
             return;
@@ -107,50 +149,23 @@ public class VideoPreviewFragment extends Fragment {
             return;
         }
 
-        Log.e(TAG, "PLAY VIDEO");
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-                    @Override
-                    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-                        Surface surface = new Surface(surfaceTexture);
-                        showVideoPreview(surface);
-                    }
-
-                    @Override
-                    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-
-                    }
-
-                    @Override
-                    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-                        surfaceTexture.release();
-                        return false;
-                    }
-
-                    @Override
-                    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
-                    }
-                });
-
-            }
-        });
     }
 
     private void pauseVideo() {
+        Log.e(TAG, "PLAY VIDEO PAUSE");
         if (mediaPlayer == null) {
             return;
         }
 
-        mediaPlayer.pause();
+        mediaPlayer.release();
+        mediaPlayer = null;
         if (mediaController == null) {
             return;
         }
 
         mediaController.hide();
+        mediaController = null;
     }
 
     private void loadVideoParams(Bundle savedInstanceState) {
@@ -229,10 +244,6 @@ public class VideoPreviewFragment extends Fragment {
                         }
                     });
 
-
-                    mediaPlayer.start();
-                    mediaPlayer.seekTo(currentPlaybackPosition);
-
                     Log.e(TAG, "START");
 //                    if (!isVideoPlaying)
 //                        mediaPlayer.pause();
@@ -277,7 +288,7 @@ public class VideoPreviewFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        ButterKnife.unbind(this);
+//        ButterKnife.unbind(this);
         super.onDestroyView();
         if (mediaPlayer != null) {
             mediaPlayer.release();

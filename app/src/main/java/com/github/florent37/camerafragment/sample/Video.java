@@ -1,7 +1,5 @@
 package com.github.florent37.camerafragment.sample;
 
-import android.support.v4.app.Fragment;
-
 /**
  * Created by android on 3/7/17.
  */
@@ -10,9 +8,9 @@ public class Video {
 
     private String name;
     private String path;
-    private Fragment fragment;
+    private VideoPreviewFragment fragment;
 
-    public Video(Fragment fragment, String name, String path) {
+    public Video(VideoPreviewFragment fragment, String name, String path) {
         this.name = name;
         this.path = path;
         this.fragment = fragment;
@@ -34,11 +32,11 @@ public class Video {
         this.path = path;
     }
 
-    public Fragment getFragment() {
+    public VideoPreviewFragment getFragment() {
         return fragment;
     }
 
-    public void setFragment(Fragment fragment) {
+    public void setFragment(VideoPreviewFragment fragment) {
         this.fragment = fragment;
     }
 }
