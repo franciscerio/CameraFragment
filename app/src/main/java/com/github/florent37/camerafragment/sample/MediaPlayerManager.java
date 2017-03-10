@@ -62,7 +62,7 @@ public class MediaPlayerManager {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
-                public void onPrepared(MediaPlayer mp) {
+                public synchronized void onPrepared(MediaPlayer mp) {
 
                     mediaController.setAnchorView(surfaceTextureView);
                     mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
@@ -122,13 +122,14 @@ public class MediaPlayerManager {
                         }
                     });
 
-//                    mediaPlayer.start();
+                    mediaPlayer.start();
 //                    mediaPlayer.seekTo(currentPlaybackPosition);
 
 //                    if (!isVideoPlaying)
 //                        mediaPlayer.pause();
                 }
             });
+
             mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -267,7 +268,7 @@ public class MediaPlayerManager {
         return mediaPlayer.isPlaying();
     }
 
-    public void start() {
+    public synchronized void start() {
 
         if (mediaPlayer == null) {
             return;

@@ -1,5 +1,6 @@
 package com.github.florent37.camerafragment.sample;
 
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -7,6 +8,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.MediaController;
@@ -109,30 +112,31 @@ public class VideoPreviewFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         Log.e(TAG, "PLAY playVideo onActivityCreated " + videoName);
 
-//        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-//            @Override
-//            public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-//                Log.e(TAG, "PLAY VIDEO onSurfaceTextureAvailable");
-//                final Surface surface = new Surface(surfaceTexture);
-//                MediaPlayerManager.getInstance().initializeMediaPlayer(textureView, , surface, mediaController);
-//            }
-//
-//            @Override
-//            public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-//                Log.e(TAG, "PLAY VIDEO onSurfaceTextureSizeChanged");
-//            }
-//
-//            @Override
-//            public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-//                surfaceTexture.release();
-//                Log.e(TAG, "PLAY VIDEO onSurfaceTextureDestroyed");
-//                return false;
-//            }
-//
-//            @Override
-//            public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-//            }
-//        });
+        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
+                Log.e(TAG, "PLAY VIDEO onSurfaceTextureAvailable");
+                final Surface surface = new Surface(surfaceTexture);
+
+                MediaPlayerManager.getInstance().initializeMediaPlayer(textureView, url, surface, mediaController);
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
+                Log.e(TAG, "PLAY VIDEO onSurfaceTextureSizeChanged");
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+                surfaceTexture.release();
+                Log.e(TAG, "PLAY VIDEO onSurfaceTextureDestroyed");
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+            }
+        });
     }
 
     @Override
@@ -175,7 +179,7 @@ public class VideoPreviewFragment extends Fragment {
 //        }
 //        new Ahm().execute();
 
-        MediaPlayerManager.getInstance().start();
+//        MediaPlayerManager.getInstance().start();
 
         Log.e(TAG, "PLAY VIDEO " + videoName);
 
