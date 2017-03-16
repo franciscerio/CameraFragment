@@ -10,11 +10,12 @@ public class Video {
     private String path;
     private VideoPreviewFragment fragment;
 
-    public Video(VideoPreviewFragment fragment, String name, String path) {
+    public Video(VideoPreviewFragment fragment) {
         this.name = name;
         this.path = path;
         this.fragment = fragment;
     }
+
 
     public String getName() {
         return name;

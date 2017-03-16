@@ -3,6 +3,7 @@ package com.github.florent37.camerafragment.sample;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
+import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -12,7 +13,7 @@ import android.view.TextureView;
 /**
  * This extension of {@link TextureView} is created to isolate scaling of this view.
  */
-public class ScalableTextureView extends TextureView {
+public class ScalableTextureView extends TextureView implements TextureView.SurfaceTextureListener {
 
     private static final boolean SHOW_LOGS = false;
     private static final String TAG = ScalableTextureView.class.getSimpleName();
@@ -37,16 +38,37 @@ public class ScalableTextureView extends TextureView {
 
     private ScaleType mScaleType;
 
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+
+    }
+
     public enum ScaleType {
         CENTER_CROP, TOP, BOTTOM, FILL, FIT_XY
     }
 
     public ScalableTextureView(Context context) {
         super(context);
+//        init();
     }
 
     public ScalableTextureView(Context context, AttributeSet attrs) {
         super(context, attrs);
+//        init();
     }
 
     public ScalableTextureView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -56,6 +78,10 @@ public class ScalableTextureView extends TextureView {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ScalableTextureView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    private void init() {
+        setSurfaceTextureListener(this);
     }
 
     public void setScaleType(ScaleType scaleType) {

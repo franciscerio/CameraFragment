@@ -18,8 +18,9 @@ public class MediaPlayerManager {
     //    private static MediaController mediaController;
     private static MediaPlayer mediaPlayer;
     //    private MediaController mediaController;
-    private final boolean isPreparing = false;
+    private boolean isPreparing = true;
     private static MediaPlayerManager INSTANCE;
+    private final Object lock = new Object();
 
 
     public static synchronized MediaPlayerManager getInstance() {
@@ -49,100 +50,101 @@ public class MediaPlayerManager {
         mediaPlayer = player;
     }
 
-    public synchronized void initializeMediaPlayer(final ScalableTextureView surfaceTextureView, String url, Surface holder, final MediaController mediaController) {
+
+
+    public void setUpMediaPlayer(final ScalableTextureView surfaceTextureView, String url, Surface holder, final MediaController mediaController, String name) {
         if (mediaPlayer == null) {
             throw new NullPointerException("MediaPlayer null");
         }
+        synchronized (lock) {
+            try {
+                isPreparing = true;
 
-        try {
+                Uri uri = Uri.parse(url);
+                mediaPlayer.setDataSource(App.getInstance(), uri);
+//                mediaPlayer.setSurface(holder);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public synchronized void onPrepared(MediaPlayer mp) {
+                        isPreparing = false;
+                        mediaController.setAnchorView(surfaceTextureView);
+                        mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
+                            @Override
+                            public void start() {
+                                mediaPlayer.start();
+                            }
 
-            Uri uri = Uri.parse(url);
-            mediaPlayer.setDataSource(App.getInstance(), uri);
-            mediaPlayer.setSurface(holder);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public synchronized void onPrepared(MediaPlayer mp) {
+                            @Override
+                            public void pause() {
+                                mediaPlayer.pause();
+                            }
 
-                    mediaController.setAnchorView(surfaceTextureView);
-                    mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
-                        @Override
-                        public void start() {
-                            mediaPlayer.start();
-                        }
+                            @Override
+                            public int getDuration() {
+                                return mediaPlayer.getDuration();
+                            }
 
-                        @Override
-                        public void pause() {
-                            mediaPlayer.pause();
-                        }
+                            @Override
+                            public int getCurrentPosition() {
+                                return mediaPlayer.getCurrentPosition();
+                            }
 
-                        @Override
-                        public int getDuration() {
-                            return mediaPlayer.getDuration();
-                        }
+                            @Override
+                            public void seekTo(int pos) {
+                                mediaPlayer.seekTo(pos);
+                            }
 
-                        @Override
-                        public int getCurrentPosition() {
-                            return mediaPlayer.getCurrentPosition();
-                        }
+                            @Override
+                            public boolean isPlaying() {
+                                return mediaPlayer.isPlaying();
+                            }
 
-                        @Override
-                        public void seekTo(int pos) {
-                            mediaPlayer.seekTo(pos);
-                        }
+                            @Override
+                            public int getBufferPercentage() {
+                                return 0;
+                            }
 
-                        @Override
-                        public boolean isPlaying() {
-                            return mediaPlayer.isPlaying();
-                        }
+                            @Override
+                            public boolean canPause() {
+                                return true;
+                            }
 
-                        @Override
-                        public int getBufferPercentage() {
-                            return 0;
-                        }
+                            @Override
+                            public boolean canSeekBackward() {
+                                return true;
+                            }
 
-                        @Override
-                        public boolean canPause() {
-                            return true;
-                        }
+                            @Override
+                            public boolean canSeekForward() {
+                                return true;
+                            }
 
-                        @Override
-                        public boolean canSeekBackward() {
-                            return true;
-                        }
+                            @Override
+                            public int getAudioSessionId() {
+                                return mediaPlayer.getAudioSessionId();
+                            }
+                        });
 
-                        @Override
-                        public boolean canSeekForward() {
-                            return true;
-                        }
-
-                        @Override
-                        public int getAudioSessionId() {
-                            return mediaPlayer.getAudioSessionId();
-                        }
-                    });
-
-                    mediaPlayer.start();
+//                    mediaPlayer.start();
 //                    mediaPlayer.seekTo(currentPlaybackPosition);
 
 //                    if (!isVideoPlaying)
 //                        mediaPlayer.pause();
-                }
-            });
+                    }
+                });
 
-            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    return true;
-                }
-            });
-
-            mediaPlayer.prepare();
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error media player playing video.");
+                mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                    @Override
+                    public boolean onError(MediaPlayer mp, int what, int extra) {
+                        return true;
+                    }
+                });
+                mediaPlayer.prepare();
+            } catch (Exception e) {
+                Log.e(TAG, "Error media player playing video.");
+            }
         }
-
     }
 
     public synchronized void playMediaPlayer(final ScalableTextureView surfaceTextureView, Surface holder, final MediaController mediaController) {
@@ -268,12 +270,17 @@ public class MediaPlayerManager {
         return mediaPlayer.isPlaying();
     }
 
-    public synchronized void start() {
-
+    public void start() {
         if (mediaPlayer == null) {
             return;
         }
-        mediaPlayer.start();
+
+        synchronized (lock) {
+            if (isPreparing) {
+                return;
+            }
+            mediaPlayer.start();
+        }
 
     }
 

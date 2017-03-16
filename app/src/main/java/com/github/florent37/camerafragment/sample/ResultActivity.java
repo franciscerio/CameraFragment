@@ -23,6 +23,8 @@ public class ResultActivity extends AppCompatActivity {
     ArrayList<Video> urlPath;
     VideoPagerAdapter mPagerAdapter;
 
+    private int mLastPage = 0;
+
     private static final String TAG = ResultActivity.class.getCanonicalName();
 
     @Override
@@ -38,7 +40,7 @@ public class ResultActivity extends AppCompatActivity {
         urlPath = new ArrayList<>();
         setData();
 
-        mPagerAdapter = new VideoPagerAdapter(getSupportFragmentManager(), urlPath);
+        mPagerAdapter = new VideoPagerAdapter(getSupportFragmentManager(), media.getVideos());
         mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
         mPager.setAdapter(mPagerAdapter);
         mPager.setPageTransformer(true, new ZoomOutPageTransformer());
@@ -50,12 +52,25 @@ public class ResultActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                //pause and play
                 VideoPreviewFragment fragment = (VideoPreviewFragment) mPagerAdapter.getItem(position);
+                VideoPreviewFragment fragmentMedia = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
+                fragmentMedia.hideController();
+                
                 fragment.setUserVisibleHint(true);
+                int currentPosition = fragmentMedia.getMediaCurrentPosition();
 
-                Log.e(TAG, "fragment position getUserVisibleHint = " + fragment.getUserVisibleHint() + " position = " + position);
-                Log.e(TAG, "fragment position isMenuVisible = " + fragment.isMenuVisible() + " position = " + position);
-                Log.e(TAG, "fragment position isResumed = " + fragment.isResumed() + " position = " + position);
+                //get lastpage mediaplayer seek length
+                Log.e(TAG, "position = " + position);
+                Log.e(TAG, "mLastPage = " + mLastPage);
+                Log.e(TAG, "currentPosition = " + currentPosition);
+                fragment.setCurrentPlaybackPosition(fragmentMedia.isVideoComplete() ? 0 : currentPosition);
+                Log.e(TAG, "===========================================================================================");
+                Log.e(TAG, "===========================================================================================");
+//                Log.e(TAG, "fragment position getUserVisibleHint = " + fragment.getUserVisibleHint() + " position = " + position);
+//                Log.e(TAG, "fragment position isMenuVisible = " + fragment.isMenuVisible() + " position = " + position);
+//                Log.e(TAG, "fragment position isResumed = " + fragment.isResumed() + " position = " + position);
+                mLastPage = position;
             }
 
             @Override
@@ -70,17 +85,30 @@ public class ResultActivity extends AppCompatActivity {
 
     }
 
-
     private void setData() {
         Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.sample_360);
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString()), "video 1", uri.toString()));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", uri.toString()), "video 2", uri.toString()));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", uri.toString()), "video 3", uri.toString()));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", uri.toString()), "video 4", uri.toString()));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", uri.toString()), "video 5", uri.toString()));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString()), "video 6", uri.toString()));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString()), "video 7", uri.toString()));
+        media = new Media();
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString()), "video 1", uri.toString()));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", uri.toString()), "video 2", uri.toString()));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", uri.toString()), "video 3", uri.toString()));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", uri.toString()), "video 4", uri.toString()));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", uri.toString()), "video 5", uri.toString()));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString()), "video 6", uri.toString()));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString()), "video 7", uri.toString()));
+
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString())));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", uri.toString())));
+
+
+        media.setVideos(urlPath);
     }
 
+    private Media media;
 
 }
