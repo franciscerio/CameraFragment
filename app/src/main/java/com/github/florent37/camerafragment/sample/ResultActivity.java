@@ -2,11 +2,13 @@ package com.github.florent37.camerafragment.sample;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -56,7 +58,7 @@ public class ResultActivity extends AppCompatActivity {
                 VideoPreviewFragment fragment = (VideoPreviewFragment) mPagerAdapter.getItem(position);
                 VideoPreviewFragment fragmentMedia = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
                 fragmentMedia.hideController();
-                
+
                 fragment.setUserVisibleHint(true);
                 int currentPosition = fragmentMedia.getMediaCurrentPosition();
 
@@ -86,7 +88,13 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void setData() {
-        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.sample_360);
+        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.video1);
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
+        File file = new File(path);
+
+        boolean isExist = file.exists();
+        String videoPath = file.getAbsolutePath();
+
         media = new Media();
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString()), "video 1", uri.toString()));
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", uri.toString()), "video 2", uri.toString()));
@@ -104,6 +112,15 @@ public class ResultActivity extends AppCompatActivity {
         urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString())));
         urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString())));
         urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", uri.toString())));
+
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", videoPath)));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", videoPath)));
 
 
         media.setVideos(urlPath);

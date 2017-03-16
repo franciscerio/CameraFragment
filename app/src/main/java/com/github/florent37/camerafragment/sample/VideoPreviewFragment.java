@@ -1,7 +1,6 @@
 package com.github.florent37.camerafragment.sample;
 
 import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -187,7 +186,7 @@ public class VideoPreviewFragment extends Fragment {
         Log.e(TAG, "PLAY playVideo textureView " + videoName);
         Log.e(TAG, "PLAY VIDEO isPreparing = " + isPreparing + " getUserVisibleHint() = " + getUserVisibleHint() + " mediaplayer = " + mediaPlayer);
         if (mediaPlayer == null) {
-            mediaPlayer = new MediaPlayer();
+//            mediaPlayer = new MediaPlayer();
             mediaController = new MediaController(getActivity());
             setupMediaPlayer();
         } else {
@@ -246,9 +245,10 @@ public class VideoPreviewFragment extends Fragment {
     private synchronized void showVideoPreview(Surface holder) {
         try {
 
-            mediaPlayer.setDataSource(getActivity(), Uri.parse(url));
+//            mediaPlayer.setDataSource(getActivity(), Uri.parse(url));
+            mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(url));
             mediaPlayer.setSurface(holder);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setScreenOnWhilePlaying(true);
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
