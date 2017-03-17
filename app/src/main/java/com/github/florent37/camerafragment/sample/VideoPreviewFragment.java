@@ -1,6 +1,7 @@
 package com.github.florent37.camerafragment.sample;
 
 import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ public class VideoPreviewFragment extends Fragment {
     private MediaPlayer mediaPlayer;
     private boolean isPreparing;
     private ScalableTextureView textureView;
+    private MediaPlayerHandler mHandler;
 
     public static VideoPreviewFragment newInstance(String name, String url) {
         VideoPreviewFragment fragment = new VideoPreviewFragment();
@@ -105,7 +107,7 @@ public class VideoPreviewFragment extends Fragment {
 
     private void setupMediaPlayer() {
         Log.e(TAG, "PLAY VIDEO setupMediaPlayer ");
-        setUpTextureView();
+
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
@@ -134,7 +136,7 @@ public class VideoPreviewFragment extends Fragment {
 
     public synchronized int getMediaCurrentPosition() {
         if (mediaPlayer == null) {
-            return -1;
+            return 0;
         }
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
@@ -160,7 +162,7 @@ public class VideoPreviewFragment extends Fragment {
         if (visible && isResumed()) {
             onResume();
         } else {
-            pauseVideo();
+            onPause();
         }
 
     }
@@ -183,18 +185,38 @@ public class VideoPreviewFragment extends Fragment {
     }
 
     private synchronized void playVideo(int currentPlaybackPosition) {
-        Log.e(TAG, "PLAY playVideo textureView " + videoName);
+//        Log.e(TAG, "PLAY playVideo textureView " + videoName);
         Log.e(TAG, "PLAY VIDEO isPreparing = " + isPreparing + " getUserVisibleHint() = " + getUserVisibleHint() + " mediaplayer = " + mediaPlayer);
         if (mediaPlayer == null) {
-//            mediaPlayer = new MediaPlayer();
+//            mHandler = new MediaPlayerHandler(new MediaPlayerHandler.MediaPlayerListeners() {
+//                @Override
+//                public void onBackground() {
+//                }
+//
+//                @Override
+//                public void onPreExecute() {
+//                    mediaPlayer = new MediaPlayer();
+//                    mediaController = new MediaController(getActivity());
+//                    setUpTextureView();
+//                }
+//
+//                @Override
+//                public void onPostExecute() {
+//                    setupMediaPlayer();
+//                }
+//            });
+//            mHandler.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            mediaPlayer = new MediaPlayer();
             mediaController = new MediaController(getActivity());
+            setUpTextureView();
             setupMediaPlayer();
+
         } else {
             if (getUserVisibleHint() && !isPreparing) {
                 if (mediaPlayer != null) {
                     if (!mediaPlayer.isPlaying()) {
-                        mediaPlayer.start();
-                        mediaPlayer.seekTo(currentPlaybackPosition);
+//                        mediaPlayer.start();
+//                        mediaPlayer.seekTo(currentPlaybackPosition);
 
                     }
                 }
@@ -202,26 +224,63 @@ public class VideoPreviewFragment extends Fragment {
             }
         }
 
-        Log.e(TAG, "PLAY VIDEO " + videoName);
-
     }
 
     private void pause() {
         if (mediaPlayer == null) {
             return;
         }
+
         mediaPlayer.stop();
         mediaPlayer.reset();
         mediaPlayer.release();
+
         mediaPlayer = null;
         mediaController = null;
+        isPreparing = true;
 
-        if (textureView != null) {
+        if (textureView != null && mRelativeContainer != null) {
             textureView.removeCallbacks(null);
             mRelativeContainer.removeView(textureView);
+
+            textureView = null;
         }
 
-        textureView = null;
+
+//        mHandler = new MediaPlayerHandler(new MediaPlayerHandler.MediaPlayerListeners() {
+//            @Override
+//            public void onBackground() {
+//                if (mediaPlayer == null) {
+//                    return;
+//                }
+//                mediaPlayer.release();
+//            }
+//
+//            @Override
+//            public void onPreExecute() {
+//                if (mediaPlayer == null) {
+//                    return;
+//                }
+//                mediaPlayer.stop();
+//                mediaPlayer.reset();
+//            }
+//
+//            @Override
+//            public void onPostExecute() {
+//                mediaPlayer = null;
+//                mediaController = null;
+//                isPreparing = true;
+//
+//            }
+//        });
+//        mHandler.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+//
+//        if (textureView != null && mRelativeContainer != null) {
+//            textureView.removeCallbacks(null);
+//            mRelativeContainer.removeView(textureView);
+//        }
+//
+//        textureView = null;
     }
 
 
@@ -242,13 +301,12 @@ public class VideoPreviewFragment extends Fragment {
 //        isVideoPlaying = savedInstanceState.getBoolean(VIDEO_IS_PLAYED_ARG, true);
     }
 
-    private synchronized void showVideoPreview(Surface holder) {
+    private void showVideoPreview(Surface holder) {
         try {
-
-//            mediaPlayer.setDataSource(getActivity(), Uri.parse(url));
-            mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(url));
+//            mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(url));
+            mediaPlayer.setDataSource(getActivity(), Uri.parse(url));
             mediaPlayer.setSurface(holder);
-//            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setScreenOnWhilePlaying(true);
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -264,6 +322,7 @@ public class VideoPreviewFragment extends Fragment {
                             }
                             isVideoComplete = false;
                             mediaPlayer.start();
+                            mediaPlayer.seekTo(currentPlaybackPosition);
                         }
 
                         @Override
@@ -273,6 +332,8 @@ public class VideoPreviewFragment extends Fragment {
                             }
                             mediaPlayer.pause();
                         }
+
+
 
                         @Override
                         public int getDuration() {
@@ -363,9 +424,9 @@ public class VideoPreviewFragment extends Fragment {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     Log.e(TAG, "ERROR");
+                    playVideo(currentPlaybackPosition);
                     isPreparing = true;
-                    getActivity().finish();
-                    return true;
+                    return false;
                 }
             });
 
@@ -512,6 +573,7 @@ public class VideoPreviewFragment extends Fragment {
     }
 
     private void setUpTextureView() {
+        Log.e(TAG, "PLAY VIDEO setUpTextureView");
         textureView = new ScalableTextureView(getActivity());
 
         textureView.setOnTouchListener(new View.OnTouchListener() {

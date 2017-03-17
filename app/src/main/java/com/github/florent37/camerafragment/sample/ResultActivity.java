@@ -63,9 +63,9 @@ public class ResultActivity extends AppCompatActivity {
                 int currentPosition = fragmentMedia.getMediaCurrentPosition();
 
                 //get lastpage mediaplayer seek length
-                Log.e(TAG, "position = " + position);
-                Log.e(TAG, "mLastPage = " + mLastPage);
-                Log.e(TAG, "currentPosition = " + currentPosition);
+//                Log.e(TAG, "position = " + position);
+//                Log.e(TAG, "mLastPage = " + mLastPage);
+//                Log.e(TAG, "currentPosition = " + currentPosition);
                 fragment.setCurrentPlaybackPosition(fragmentMedia.isVideoComplete() ? 0 : currentPosition);
                 Log.e(TAG, "===========================================================================================");
                 Log.e(TAG, "===========================================================================================");
