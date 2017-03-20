@@ -334,7 +334,6 @@ public class VideoPreviewFragment extends Fragment {
                         }
 
 
-
                         @Override
                         public int getDuration() {
                             if (mediaPlayer == null) {
@@ -348,7 +347,6 @@ public class VideoPreviewFragment extends Fragment {
                             if (mediaPlayer == null) {
                                 return 0;
                             }
-
                             return mediaPlayer.getCurrentPosition();
                         }
 
