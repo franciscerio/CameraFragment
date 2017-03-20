@@ -55,18 +55,20 @@ public class ResultActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 //pause and play
-                VideoPreviewFragment fragment = (VideoPreviewFragment) mPagerAdapter.getItem(position);
-                VideoPreviewFragment fragmentMedia = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
-                fragmentMedia.hideController();
+//                VideoPreviewFragment fragment = (VideoPreviewFragment) mPagerAdapter.getItem(position);
+//                VideoPreviewFragment fragmentMedia = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
+//                fragment.onResume();
+//                fragmentMedia.onPause();
+//                fragmentMedia.hideController();
 
-                fragment.setUserVisibleHint(true);
-                int currentPosition = fragmentMedia.getMediaCurrentPosition();
+//                fragment.setUserVisibleHint(true);
+//                int currentPosition = fragmentMedia.getMediaCurrentPosition();
 
                 //get lastpage mediaplayer seek length
 //                Log.e(TAG, "position = " + position);
 //                Log.e(TAG, "mLastPage = " + mLastPage);
 //                Log.e(TAG, "currentPosition = " + currentPosition);
-                fragment.setCurrentPlaybackPosition(fragmentMedia.isVideoComplete() ? 0 : currentPosition);
+//                fragment.setCurrentPlaybackPosition(fragmentMedia.isVideoComplete() ? 0 : currentPosition);
                 Log.e(TAG, "===========================================================================================");
                 Log.e(TAG, "===========================================================================================");
 //                Log.e(TAG, "fragment position getUserVisibleHint = " + fragment.getUserVisibleHint() + " position = " + position);
@@ -88,7 +90,8 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void setData() {
-        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.video1);
+//        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.video1);
+        Uri uri = Uri.parse("file:///android_asset/video1.mp4");
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
         File file = new File(path);
 
@@ -104,23 +107,23 @@ public class ResultActivity extends AppCompatActivity {
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString()), "video 6", uri.toString()));
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString()), "video 7", uri.toString()));
 
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString())));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString())));
+//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", uri.toString())));
 
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", videoPath)));
-//        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", videoPath)));
 
 
         media.setVideos(urlPath);
