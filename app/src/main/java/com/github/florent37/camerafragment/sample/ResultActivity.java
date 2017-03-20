@@ -57,16 +57,16 @@ public class ResultActivity extends AppCompatActivity {
                 //pause and play
                 VideoPreviewFragment fragment = (VideoPreviewFragment) mPagerAdapter.getItem(position);
                 VideoPreviewFragment fragmentMedia = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
-                fragmentMedia.hideController();
+//                fragmentMedia.hideController();
 
                 fragment.setUserVisibleHint(true);
-                int currentPosition = fragmentMedia.getMediaCurrentPosition();
+//                int currentPosition = fragmentMedia.getMediaCurrentPosition();
 
                 //get lastpage mediaplayer seek length
 //                Log.e(TAG, "position = " + position);
 //                Log.e(TAG, "mLastPage = " + mLastPage);
 //                Log.e(TAG, "currentPosition = " + currentPosition);
-                fragment.setCurrentPlaybackPosition(fragmentMedia.isVideoComplete() ? 0 : currentPosition);
+//                fragment.setCurrentPlaybackPosition(fragmentMedia.isVideoComplete() ? 0 : currentPosition);
                 Log.e(TAG, "===========================================================================================");
                 Log.e(TAG, "===========================================================================================");
 //                Log.e(TAG, "fragment position getUserVisibleHint = " + fragment.getUserVisibleHint() + " position = " + position);
@@ -88,7 +88,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void setData() {
-        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.video1);
+        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.video1);
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
         File file = new File(path);
 

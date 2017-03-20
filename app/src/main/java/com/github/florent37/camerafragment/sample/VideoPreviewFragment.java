@@ -1,23 +1,50 @@
 package com.github.florent37.camerafragment.sample;
 
-import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
+
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.MediaController;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
+import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
+import com.google.android.exoplayer2.source.BehindLiveWindowException;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
+import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import com.google.android.exoplayer2.ui.PlaybackControlView;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.util.Util;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -27,19 +54,15 @@ import butterknife.ButterKnife;
  * Created by android on 3/7/17.
  */
 
-public class VideoPreviewFragment extends Fragment {
+public class VideoPreviewFragment extends Fragment implements View.OnClickListener, ExoPlayer.EventListener,
+        PlaybackControlView.VisibilityListener {
 
     public static final String TAG = VideoPreviewFragment.class.getCanonicalName();
     private static final String TAG_NAME = "name";
     private static final String TAG_URL = "url";
-    private static final String TAG_MEDIA = "media";
 
     private String videoName;
     private String url;
-    private MediaPlayer mediaPlayer;
-    private boolean isPreparing;
-    private ScalableTextureView textureView;
-    private MediaPlayerHandler mHandler;
 
     public static VideoPreviewFragment newInstance(String name, String url) {
         VideoPreviewFragment fragment = new VideoPreviewFragment();
@@ -51,110 +74,21 @@ public class VideoPreviewFragment extends Fragment {
         return fragment;
     }
 
-    private final static String VIDEO_POSITION_ARG = "current_video_position";
-    private final static String VIDEO_IS_PLAYED_ARG = "is_played";
 
-    private int currentPlaybackPosition = 0;
-    private boolean isVideoComplete = false;
+    private DataSource.Factory mediaDataSourceFactory;
 
-
-    @Bind(R.id.relativeContainer)
-    RelativeLayout mRelativeContainer;
-
-    @Bind(R.id.name)
-    protected TextView name;
-
-    private MediaController mediaController;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            videoName = bundle.getString(TAG_NAME, "");
-            url = bundle.getString(TAG_URL, "");
-        }
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_video_preview, container, false);
-        ButterKnife.bind(this, view);
-
-//        mediaController = new MediaController(getActivity());
-//        mediaPlayer = new MediaPlayer();
-
-        if (savedInstanceState != null) {
-            loadVideoParams(savedInstanceState);
-        }
+    private SimpleExoPlayer player;
+    private DefaultTrackSelector trackSelector;
+    private TrackSelectionHelper trackSelectionHelper;
+    private Handler mainHandler;
+    private EventLogger eventLogger;
+    private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
 
 
-        if (!TextUtils.isEmpty(videoName)) {
-            setName(videoName);
-        }
-
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-//        Log.e(TAG, "PLAY playVideo onActivityCreated ");
-//        setupMediaPlayer();
-    }
-
-    private void setupMediaPlayer() {
-        Log.e(TAG, "PLAY VIDEO setupMediaPlayer ");
-
-        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-                Log.e(TAG, "PLAY VIDEO onSurfaceTextureAvailable " + videoName);
-                final Surface surface = new Surface(surfaceTexture);
-                showVideoPreview(surface);
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-//                Log.e(TAG, "PLAY VIDEO onSurfaceTextureSizeChanged " + videoName);
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-                surfaceTexture.release();
-                pause();
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-            }
-        });
-    }
-
-    public synchronized int getMediaCurrentPosition() {
-        if (mediaPlayer == null) {
-            return 0;
-        }
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-        }
-        return mediaPlayer.getCurrentPosition();
-    }
-
-    public void hideController() {
-        if (mediaPlayer == null) {
-            return;
-        }
-
-        if (mediaController == null) {
-            return;
-        }
-
-        mediaController.hide();
-    }
+    private boolean needRetrySource;
+    private boolean shouldAutoPlay;
+    private int resumeWindow;
+    private long resumePosition;
 
     @Override
     public void setUserVisibleHint(boolean visible) {
@@ -173,445 +107,344 @@ public class VideoPreviewFragment extends Fragment {
         if (!getUserVisibleHint()) {
             return;
         }
-//        Log.e(TAG, "PLAY playVideo onResume = " + textureView.isAvailable() + " videname = " + videoName);
 
-        playVideo(currentPlaybackPosition);
+        if (player == null) {
+            initializePlayer();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        pause();
+//        if (Util.SDK_INT <= 23) {
+        releasePlayer();
+//        }
     }
 
-    private synchronized void playVideo(int currentPlaybackPosition) {
-//        Log.e(TAG, "PLAY playVideo textureView " + videoName);
-        Log.e(TAG, "PLAY VIDEO isPreparing = " + isPreparing + " getUserVisibleHint() = " + getUserVisibleHint() + " mediaplayer = " + mediaPlayer);
-        if (mediaPlayer == null) {
-//            mHandler = new MediaPlayerHandler(new MediaPlayerHandler.MediaPlayerListeners() {
-//                @Override
-//                public void onBackground() {
-//                }
-//
-//                @Override
-//                public void onPreExecute() {
-//                    mediaPlayer = new MediaPlayer();
-//                    mediaController = new MediaController(getActivity());
-//                    setUpTextureView();
-//                }
-//
-//                @Override
-//                public void onPostExecute() {
-//                    setupMediaPlayer();
-//                }
-//            });
-//            mHandler.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-            mediaPlayer = new MediaPlayer();
-            mediaController = new MediaController(getActivity());
-            setUpTextureView();
-            setupMediaPlayer();
+    private void releasePlayer() {
+        if (player != null) {
+            shouldAutoPlay = player.getPlayWhenReady();
+            updateResumePosition();
+            player.release();
+            player = null;
+            trackSelector = null;
+            trackSelectionHelper = null;
+            eventLogger = null;
+            frameLayout.removeView(simpleExoPlayerView);
+            simpleExoPlayerView = null;
+        }
+    }
 
-        } else {
-            if (getUserVisibleHint() && !isPreparing) {
-                if (mediaPlayer != null) {
-                    if (!mediaPlayer.isPlaying()) {
-                        mediaPlayer.start();
-                        mediaPlayer.seekTo(currentPlaybackPosition);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            videoName = bundle.getString(TAG_NAME, "");
+            url = bundle.getString(TAG_URL, "");
+
+            mediaDataSourceFactory = buildDataSourceFactory(true);
+            mainHandler = new Handler();
+        }
+
+    }
+
+    @Bind(R.id.controls_root)
+    LinearLayout debugRootView;
+
+    @Bind(R.id.activity_main)
+    FrameLayout frameLayout;
+
+    SimpleExoPlayerView simpleExoPlayerView;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_video_preview, container, false);
+        ButterKnife.bind(this, view);
+        return view;
+    }
+
+
+    private void initializePlayer() {
+        if (simpleExoPlayerView != null) {
+            simpleExoPlayerView = null;
+        }
+
+        simpleExoPlayerView = new SimpleExoPlayerView(getActivity());
+        simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+        frameLayout.addView(simpleExoPlayerView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        simpleExoPlayerView.setControllerVisibilityListener(this);
+        simpleExoPlayerView.requestFocus();
+
+        boolean needNewPlayer = player == null;
+        if (needNewPlayer) {
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            trackSelectionHelper = new TrackSelectionHelper(trackSelector, videoTrackSelectionFactory);
+            player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, new DefaultLoadControl());
+            player.addListener(this);
+
+            eventLogger = new EventLogger(trackSelector);
+            player.addListener(eventLogger);
+            player.setAudioDebugListener(eventLogger);
+            player.setVideoDebugListener(eventLogger);
+            player.setMetadataOutput(eventLogger);
+
+            simpleExoPlayerView.setPlayer(player);
+            player.setPlayWhenReady(true);
+        }
+
+        if (needNewPlayer || needRetrySource) {
+//            String action = intent.getAction();
+//            Uri[] uris;
+//            String[] extensions;
+//            if (ACTION_VIEW.equals(action)) {
+//                uris = new Uri[] {intent.getData()};
+//                extensions = new String[] {intent.getStringExtra(EXTENSION_EXTRA)};
+//            } else if (ACTION_VIEW_LIST.equals(action)) {
+//                String[] uriStrings = intent.getStringArrayExtra(URI_LIST_EXTRA);
+//                uris = new Uri[uriStrings.length];
+//                for (int i = 0; i < uriStrings.length; i++) {
+//                    uris[i] = Uri.parse(uriStrings[i]);
+//                }
+//                extensions = intent.getStringArrayExtra(EXTENSION_LIST_EXTRA);
+//                if (extensions == null) {
+//                    extensions = new String[uriStrings.length];
+//                }
+//            } else {
+//                showToast(getString(R.string.unexpected_intent_action, action));
+//                return;
+//            }
+//            if (Util.maybeRequestReadExternalStoragePermission(this, uris)) {
+//                // The player will be reinitialized if the permission is granted.
+//                return;
+//            }
+//            MediaSource[] mediaSources = new MediaSource[uris.length];
+//            for (int i = 0; i < uris.length; i++) {
+//                mediaSources[i] = buildMediaSource(uris[i], extensions[i]);
+//            }
+//            MediaSource mediaSource = mediaSources.length == 1 ? mediaSources[0]
+//                    : new ConcatenatingMediaSource(mediaSources);
+            Uri mp4VideoUri = Uri.parse("file:///android_asset/video1.mp4");
+            Uri uri = Uri.parse("http://fluvod1.giniko.com/all-luxury-yachts/all-luxury-yachts/tracks-1,6/index.m3u8");
+            MediaSource mediaSource1 = buildMediaSource(mp4VideoUri, "mp4");
+
+//            MediaSource mediaSource1 = new ExtractorMediaSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"),
+//                    mediaDataSourceFactory, extractorsFactory, null, null);
+            boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+            if (haveResumePosition) {
+                player.seekTo(resumeWindow, resumePosition);
+            }
+            player.prepare(mediaSource1, !haveResumePosition, false);
+            needRetrySource = false;
+            updateButtonVisibilities();
+        }
+    }
+
+    private void updateResumePosition() {
+        resumeWindow = player.getCurrentWindowIndex();
+        resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition())
+                : C.TIME_UNSET;
+    }
+
+    private void clearResumePosition() {
+        resumeWindow = C.INDEX_UNSET;
+        resumePosition = C.TIME_UNSET;
+    }
+
+    private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
+        int type = TextUtils.isEmpty(overrideExtension) ? Util.inferContentType(uri)
+                : Util.inferContentType("." + overrideExtension);
+        switch (type) {
+            case C.TYPE_SS:
+                return new SsMediaSource(uri, buildDataSourceFactory(false),
+                        new DefaultSsChunkSource.Factory(mediaDataSourceFactory), mainHandler, eventLogger);
+            case C.TYPE_DASH:
+                return new DashMediaSource(uri, buildDataSourceFactory(false),
+                        new DefaultDashChunkSource.Factory(mediaDataSourceFactory), mainHandler, eventLogger);
+            case C.TYPE_HLS:
+                return new HlsMediaSource(uri, mediaDataSourceFactory, mainHandler, eventLogger);
+            case C.TYPE_OTHER:
+                return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
+                        mainHandler, eventLogger);
+            default: {
+                throw new IllegalStateException("Unsupported type: " + type);
+            }
+        }
+    }
+
+    private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
+        return ((DemoApplication) getActivity().getApplication())
+                .buildDataSourceFactory(useBandwidthMeter ? BANDWIDTH_METER : null);
+    }
+
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+        updateButtonVisibilities();
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+        if (mappedTrackInfo != null) {
+            if (mappedTrackInfo.getTrackTypeRendererSupport(C.TRACK_TYPE_VIDEO)
+                    == MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
+                showToast(R.string.error_unsupported_video);
+            }
+            if (mappedTrackInfo.getTrackTypeRendererSupport(C.TRACK_TYPE_AUDIO)
+                    == MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
+                showToast(R.string.error_unsupported_audio);
+            }
+        }
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if (playbackState == ExoPlayer.STATE_ENDED) {
+            showControls();
+        }
+        updateButtonVisibilities();
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException e) {
+        String errorString = null;
+        if (e.type == ExoPlaybackException.TYPE_RENDERER) {
+            Exception cause = e.getRendererException();
+            if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
+                // Special case for decoder initialization failures.
+                MediaCodecRenderer.DecoderInitializationException decoderInitializationException =
+                        (MediaCodecRenderer.DecoderInitializationException) cause;
+                if (decoderInitializationException.decoderName == null) {
+                    if (decoderInitializationException.getCause() instanceof MediaCodecUtil.DecoderQueryException) {
+                        errorString = getString(R.string.error_querying_decoders);
+                    } else if (decoderInitializationException.secureDecoderRequired) {
+                        errorString = getString(R.string.error_no_secure_decoder,
+                                decoderInitializationException.mimeType);
+                    } else {
+                        errorString = getString(R.string.error_no_decoder,
+                                decoderInitializationException.mimeType);
                     }
-                }
-
-            }
-        }
-
-    }
-
-    private void pause() {
-        if (textureView != null && mRelativeContainer != null) {
-            textureView.removeCallbacks(null);
-            mRelativeContainer.removeView(textureView);
-
-            textureView = null;
-        }
-
-        if (mediaPlayer == null) {
-            return;
-        }
-
-        mediaPlayer.stop();
-        mediaPlayer.reset();
-        mediaPlayer.release();
-
-        mediaPlayer = null;
-        mediaController = null;
-        isPreparing = true;
-
-//        mHandler = new MediaPlayerHandler(new MediaPlayerHandler.MediaPlayerListeners() {
-//            @Override
-//            public void onBackground() {
-//                if (mediaPlayer == null) {
-//                    return;
-//                }
-//                mediaPlayer.release();
-//            }
-//
-//            @Override
-//            public void onPreExecute() {
-//                if (mediaPlayer == null) {
-//                    return;
-//                }
-//                mediaPlayer.stop();
-//                mediaPlayer.reset();
-//            }
-//
-//            @Override
-//            public void onPostExecute() {
-//                mediaPlayer = null;
-//                mediaController = null;
-//                isPreparing = true;
-//
-//            }
-//        });
-//        mHandler.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-//
-//        if (textureView != null && mRelativeContainer != null) {
-//            textureView.removeCallbacks(null);
-//            mRelativeContainer.removeView(textureView);
-//        }
-//
-//        textureView = null;
-    }
-
-
-    private synchronized void pauseVideo() {
-        Log.e(TAG, "PLAY VIDEO PAUSE " + videoName);
-
-        pause();
-
-        if (mediaController == null) {
-            return;
-        }
-        mediaController.hide();
-
-    }
-
-    private void loadVideoParams(Bundle savedInstanceState) {
-//        currentPlaybackPosition = savedInstanceState.getInt(VIDEO_POSITION_ARG, 0);
-//        isVideoPlaying = savedInstanceState.getBoolean(VIDEO_IS_PLAYED_ARG, true);
-    }
-
-    private void showVideoPreview(Surface holder) {
-        try {
-//            mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(url));
-            mediaPlayer.setDataSource(getActivity(), Uri.parse(url));
-            mediaPlayer.setSurface(holder);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setScreenOnWhilePlaying(true);
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    Log.e(TAG, "PREPARE " + videoName);
-//                    mediaController = new MediaController(getActivity());
-                    mediaController.setAnchorView(textureView);
-                    mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
-                        @Override
-                        public void start() {
-                            if (mediaPlayer == null) {
-                                return;
-                            }
-                            isVideoComplete = false;
-                            mediaPlayer.start();
-                            mediaPlayer.seekTo(currentPlaybackPosition);
-                        }
-
-                        @Override
-                        public void pause() {
-                            if (mediaPlayer == null) {
-                                return;
-                            }
-                            mediaPlayer.pause();
-                        }
-
-
-                        @Override
-                        public int getDuration() {
-                            if (mediaPlayer == null) {
-                                return 0;
-                            }
-                            return mediaPlayer.getDuration();
-                        }
-
-                        @Override
-                        public int getCurrentPosition() {
-                            if (mediaPlayer == null) {
-                                return 0;
-                            }
-                            return mediaPlayer.getCurrentPosition();
-                        }
-
-                        @Override
-                        public void seekTo(int pos) {
-                            if (mediaPlayer == null) {
-                                return;
-                            }
-                            mediaPlayer.seekTo(pos);
-                        }
-
-                        @Override
-                        public boolean isPlaying() {
-                            if (mediaPlayer == null) {
-                                return false;
-                            }
-                            return mediaPlayer.isPlaying();
-                        }
-
-                        @Override
-                        public int getBufferPercentage() {
-                            return 0;
-                        }
-
-                        @Override
-                        public boolean canPause() {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean canSeekBackward() {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean canSeekForward() {
-                            return true;
-                        }
-
-                        @Override
-                        public int getAudioSessionId() {
-                            if (mediaPlayer == null) {
-                                return 0;
-                            }
-
-                            return mediaPlayer.getAudioSessionId();
-                        }
-                    });
-                    isPreparing = false;
-                    Log.e(TAG, "START " + videoName);
-                    playVideo(currentPlaybackPosition);
-
-                }
-            });
-
-            mediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-                @Override
-                public boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
-                    Log.e(TAG, "INFO");
-                    return true;
-                }
-            });
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    currentPlaybackPosition = 0;
-                    isVideoComplete = true;
-                    mediaController.hide();
-                }
-            });
-            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    Log.e(TAG, "ERROR");
-                    playVideo(currentPlaybackPosition);
-                    isPreparing = true;
-                    return false;
-                }
-            });
-
-            isPreparing = true;
-            mediaPlayer.prepareAsync();
-        } catch (Exception e) {
-            isPreparing = true;
-            Log.e(TAG, "Error media player playing video.");
-            getActivity().finish();
-        }
-    }
-
-//    private MediaPlayer showVideoPreview(Surface holder) {
-//        try {
-//            final MediaPlayer mediaPlayer = new MediaPlayer();
-//
-//            Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.sample_360);
-//            mediaPlayer.setDataSource(getActivity(), uri);
-//            mediaPlayer.setSurface(holder);
-//            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//            mediaPlayer.setScreenOnWhilePlaying(true);
-//            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                @Override
-//                public void onPrepared(MediaPlayer mp) {
-//                    Log.e(TAG, "PREPARE");
-//                    mediaController = new MediaController(getActivity());
-//                    mediaController.setAnchorView(textureView);
-//                    mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
-//                        @Override
-//                        public void start() {
-//                            mediaPlayer.start();
-//                        }
-//
-//                        @Override
-//                        public void pause() {
-//                            mediaPlayer.pause();
-//                        }
-//
-//                        @Override
-//                        public int getDuration() {
-//                            return mediaPlayer.getDuration();
-//                        }
-//
-//                        @Override
-//                        public int getCurrentPosition() {
-//                            return mediaPlayer.getCurrentPosition();
-//                        }
-//
-//                        @Override
-//                        public void seekTo(int pos) {
-//                            mediaPlayer.seekTo(pos);
-//                        }
-//
-//                        @Override
-//                        public boolean isPlaying() {
-//                            return mediaPlayer.isPlaying();
-//                        }
-//
-//                        @Override
-//                        public int getBufferPercentage() {
-//                            return 0;
-//                        }
-//
-//                        @Override
-//                        public boolean canPause() {
-//                            return true;
-//                        }
-//
-//                        @Override
-//                        public boolean canSeekBackward() {
-//                            return true;
-//                        }
-//
-//                        @Override
-//                        public boolean canSeekForward() {
-//                            return true;
-//                        }
-//
-//                        @Override
-//                        public int getAudioSessionId() {
-//                            return mediaPlayer.getAudioSessionId();
-//                        }
-//                    });
-//
-//                    Log.e(TAG, "START");
-////                    if (!isVideoPlaying)
-////                        mediaPlayer.pause();
-//                }
-//            });
-//
-//            mediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-//                @Override
-//                public boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
-//                    Log.e(TAG, "INFO");
-//                    return true;
-//                }
-//            });
-//            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-//                @Override
-//                public boolean onError(MediaPlayer mp, int what, int extra) {
-//                    Log.e(TAG, "ERROR");
-//                    getActivity().finish();
-//                    return true;
-//                }
-//            });
-//            mediaPlayer.prepareAsync();
-//
-//
-//            return mediaPlayer;
-//        } catch (Exception e) {
-//            Log.e(TAG, "Error media player playing video.");
-//            getActivity().finish();
-//        }
-//
-//        return null;
-//    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        saveVideoParams(outState);
-    }
-
-    private void saveVideoParams(Bundle outState) {
-        if (mediaPlayer != null) {
-            outState.putInt(VIDEO_POSITION_ARG, mediaPlayer.getCurrentPosition());
-            outState.putBoolean(VIDEO_IS_PLAYED_ARG, mediaPlayer.isPlaying());
-        }
-    }
-
-
-    @Override
-    public void onDestroyView() {
-//        ButterKnife.unbind(this);
-        super.onDestroyView();
-//        if (mediaPlayer != null) {
-//            mediaPlayer.release();
-//            mediaPlayer = null;
-//        }
-//        if (mediaController != null) {
-//            mediaController.hide();
-//            mediaController = null;
-//        }
-    }
-
-    private void setUpTextureView() {
-        Log.e(TAG, "PLAY VIDEO setUpTextureView");
-        textureView = new ScalableTextureView(getActivity());
-
-        textureView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mediaController == null)
-                    return false;
-                if (mediaController.isShowing()) {
-                    mediaController.hide();
                 } else {
-                    mediaController.show();
+                    errorString = getString(R.string.error_instantiating_decoder,
+                            decoderInitializationException.decoderName);
                 }
-                return false;
             }
-        });
-
-        textureView.setScaleType(ScalableTextureView.ScaleType.FILL);
-        mRelativeContainer.addView(textureView, RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        sendViewToBack(textureView);
+        }
+        if (errorString != null) {
+            showToast(errorString);
+        }
+        needRetrySource = true;
+        if (isBehindLiveWindow(e)) {
+            clearResumePosition();
+            initializePlayer();
+        } else {
+            updateResumePosition();
+            updateButtonVisibilities();
+            showControls();
+        }
     }
 
-    public void setName(String name) {
-        if (this.name == null) {
+    @Override
+    public void onPositionDiscontinuity() {
+        if (needRetrySource) {
+            // This will only occur if the user has performed a seek whilst in the error state. Update the
+            // resume position so that if the user then retries, playback will resume from the position to
+            // which they seeked.
+            updateResumePosition();
+        }
+    }
+
+    @Override
+    public void onVisibilityChange(int visibility) {
+        debugRootView.setVisibility(visibility);
+    }
+
+    private void updateButtonVisibilities() {
+        debugRootView.removeAllViews();
+
+
+        if (player == null) {
             return;
         }
 
-        this.name.setText(name);
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+        if (mappedTrackInfo == null) {
+            return;
+        }
+
+        for (int i = 0; i < mappedTrackInfo.length; i++) {
+            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
+            if (trackGroups.length != 0) {
+                Button button = new Button(getActivity());
+                int label;
+                switch (player.getRendererType(i)) {
+                    case C.TRACK_TYPE_AUDIO:
+                        label = R.string.audio;
+                        break;
+                    case C.TRACK_TYPE_VIDEO:
+                        label = R.string.video;
+                        break;
+                    case C.TRACK_TYPE_TEXT:
+                        label = R.string.text;
+                        break;
+                    default:
+                        continue;
+                }
+                button.setText(label);
+                button.setTag(i);
+                button.setOnClickListener(this);
+                debugRootView.addView(button, debugRootView.getChildCount() - 1);
+            }
+        }
     }
 
-    public void setCurrentPlaybackPosition(int currentPlaybackPosition) {
-        this.currentPlaybackPosition = currentPlaybackPosition;
+    private void showControls() {
+        debugRootView.setVisibility(View.VISIBLE);
     }
 
-    public boolean isVideoComplete() {
-        return isVideoComplete;
+    private void showToast(int messageId) {
+        showToast(getString(messageId));
     }
 
-    public void sendViewToBack(final View child) {
-        final ViewGroup parent = (ViewGroup) child.getParent();
-        if (null != parent) {
-            parent.removeView(child);
-            parent.addView(child, 0);
+    private void showToast(String message) {
+        Toast.makeText(getActivity().getApplicationContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    private static boolean isBehindLiveWindow(ExoPlaybackException e) {
+        if (e.type != ExoPlaybackException.TYPE_SOURCE) {
+            return false;
+        }
+        Throwable cause = e.getSourceException();
+        while (cause != null) {
+            if (cause instanceof BehindLiveWindowException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        if (view.getParent() == debugRootView) {
+            MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+            if (mappedTrackInfo != null) {
+                trackSelectionHelper.showSelectionDialog(getActivity(), ((Button) view).getText(),
+                        trackSelector.getCurrentMappedTrackInfo(), (int) view.getTag());
+            }
         }
     }
 
