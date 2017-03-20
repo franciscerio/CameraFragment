@@ -92,7 +92,9 @@ public class ResultActivity extends AppCompatActivity {
     private void setData() {
 //        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.video1);
         Uri uri = Uri.parse("file:///android_asset/video1.mp4");
-        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
+//        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
+//        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso (Big Android BBQ 2015).mp4";
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video2.mp4";
         File file = new File(path);
 
         boolean isExist = file.exists();

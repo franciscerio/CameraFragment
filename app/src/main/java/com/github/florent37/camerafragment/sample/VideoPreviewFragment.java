@@ -69,7 +69,8 @@ public class VideoPreviewFragment extends Fragment {
         Log.e(TAG, "url = " + url);
         Log.e(TAG, "videoName = " + videoName);
         mJcVideoPlayerStandard.setUp(url
-                , JCVideoPlayerStandard.SCREEN_LAYOUT_NORMAL, videoName);
+                , JCVideoPlayerStandard.SCREEN_WINDOW_FULLSCREEN, videoName);
+//        JCVideoPlayerStandard.startFullscreen(getActivity(), JCVideoPlayerStandard.class, url, videoName);
         mJcVideoPlayerStandard.startVideo();
     }
 
@@ -84,11 +85,11 @@ public class VideoPreviewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_video_preview, container, false);
 
-        mJcVideoPlayerStandard = (JCVideoPlayerStandard) view.findViewById(R.id.videoplayer);
+        mJcVideoPlayerStandard = (MyVideoPlayer) view.findViewById(R.id.videoplayer);
         return view;
     }
 
-    private JCVideoPlayerStandard mJcVideoPlayerStandard;
+    private MyVideoPlayer mJcVideoPlayerStandard;
 
 
 }
