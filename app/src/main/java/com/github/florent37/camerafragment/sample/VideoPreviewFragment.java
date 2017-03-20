@@ -215,9 +215,8 @@ public class VideoPreviewFragment extends Fragment {
             if (getUserVisibleHint() && !isPreparing) {
                 if (mediaPlayer != null) {
                     if (!mediaPlayer.isPlaying()) {
-//                        mediaPlayer.start();
-//                        mediaPlayer.seekTo(currentPlaybackPosition);
-
+                        mediaPlayer.start();
+                        mediaPlayer.seekTo(currentPlaybackPosition);
                     }
                 }
 
@@ -227,6 +226,13 @@ public class VideoPreviewFragment extends Fragment {
     }
 
     private void pause() {
+        if (textureView != null && mRelativeContainer != null) {
+            textureView.removeCallbacks(null);
+            mRelativeContainer.removeView(textureView);
+
+            textureView = null;
+        }
+
         if (mediaPlayer == null) {
             return;
         }
@@ -238,14 +244,6 @@ public class VideoPreviewFragment extends Fragment {
         mediaPlayer = null;
         mediaController = null;
         isPreparing = true;
-
-        if (textureView != null && mRelativeContainer != null) {
-            textureView.removeCallbacks(null);
-            mRelativeContainer.removeView(textureView);
-
-            textureView = null;
-        }
-
 
 //        mHandler = new MediaPlayerHandler(new MediaPlayerHandler.MediaPlayerListeners() {
 //            @Override
