@@ -42,4 +42,10 @@ public class MyVideoPlayer extends JCVideoPlayerStandard {
         }
     }
 
+    @Override
+    public void onError(int what, int extra) {
+        super.onError(what, extra);
+    }
+
+
 }

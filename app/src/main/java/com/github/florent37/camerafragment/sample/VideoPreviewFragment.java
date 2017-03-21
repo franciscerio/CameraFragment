@@ -24,6 +24,7 @@ public class VideoPreviewFragment extends Fragment {
 
     private String videoName;
     private String url;
+    private int currentPositionWhenPlaying = 0;
 
     public static VideoPreviewFragment newInstance(String name, String url) {
         VideoPreviewFragment fragment = new VideoPreviewFragment();
@@ -70,7 +71,7 @@ public class VideoPreviewFragment extends Fragment {
         Log.e(TAG, "videoName = " + videoName);
         mJcVideoPlayerStandard.setUp(url
                 , JCVideoPlayerStandard.SCREEN_WINDOW_FULLSCREEN, videoName);
-//        JCVideoPlayerStandard.startFullscreen(getActivity(), JCVideoPlayerStandard.class, url, videoName);
+        mJcVideoPlayerStandard.seekToInAdvance = currentPositionWhenPlaying;
         mJcVideoPlayerStandard.startVideo();
     }
 
@@ -78,6 +79,18 @@ public class VideoPreviewFragment extends Fragment {
     public void onPause() {
         super.onPause();
         JCVideoPlayer.releaseAllVideos();
+    }
+
+    public void setCurrentPositionWhenPlaying(int currentPositionWhenPlaying) {
+        this.currentPositionWhenPlaying = currentPositionWhenPlaying;
+    }
+
+    public int getCurrentPositionWhenPlaying() {
+        if (mJcVideoPlayerStandard == null) {
+            return 0;
+        }
+
+        return mJcVideoPlayerStandard.getCurrentPositionWhenPlaying();
     }
 
     @Nullable

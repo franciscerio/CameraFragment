@@ -1,6 +1,5 @@
 package com.github.florent37.camerafragment.sample;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -37,6 +36,10 @@ public class ResultActivity extends AppCompatActivity {
         initialize();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
     private void initialize() {
         urlPath = new ArrayList<>();
@@ -55,15 +58,15 @@ public class ResultActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 //pause and play
-//                VideoPreviewFragment fragment = (VideoPreviewFragment) mPagerAdapter.getItem(position);
-//                VideoPreviewFragment fragmentMedia = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
+                VideoPreviewFragment fragmentCurrentPosition = (VideoPreviewFragment) mPagerAdapter.getItem(position);
+                VideoPreviewFragment fragmentLastPosition = (VideoPreviewFragment) mPagerAdapter.getItem(mLastPage);
 //                fragment.onResume();
 //                fragmentMedia.onPause();
 //                fragmentMedia.hideController();
 
 //                fragment.setUserVisibleHint(true);
-//                int currentPosition = fragmentMedia.getMediaCurrentPosition();
-
+                int currentPosition = fragmentLastPosition.getCurrentPositionWhenPlaying();
+                fragmentCurrentPosition.setCurrentPositionWhenPlaying(currentPosition);
                 //get lastpage mediaplayer seek length
 //                Log.e(TAG, "position = " + position);
 //                Log.e(TAG, "mLastPage = " + mLastPage);
@@ -90,15 +93,20 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void setData() {
-//        Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.video1);
-        Uri uri = Uri.parse("file:///android_asset/video1.mp4");
+//        Uri uri = Uri.parse("file:///android_asset/video1.mp4");
+//        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.video1);
 //        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
-//        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso (Big Android BBQ 2015).mp4";
-        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video2.mp4";
-        File file = new File(path);
-
-        boolean isExist = file.exists();
-        String videoPath = file.getAbsolutePath();
+//        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso.mp4";
+//        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso (Big Android BBQ 2015).mp4";
+        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
+        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video2.mp4";
+        String path3 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video3.mp4";
+        String path4 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video4.mp4";
+        String path5 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video5.mp4";
+//        File file = new File(uri.toString());
+//        boolean isExist = file.exists();
+//        String videoPath = file.getAbsolutePath();
+//        String videoPath = uri.toString();
 
         media = new Media();
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", uri.toString()), "video 1", uri.toString()));
@@ -118,14 +126,14 @@ public class ResultActivity extends AppCompatActivity {
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString())));
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", uri.toString())));
 
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", videoPath)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", videoPath)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", path1)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", path2)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", path3)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", path4)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", path5)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", path1)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", path2)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", path3)));
 
 
         media.setVideos(urlPath);
