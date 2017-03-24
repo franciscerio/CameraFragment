@@ -98,11 +98,10 @@ public class ResultActivity extends AppCompatActivity {
 //        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
 //        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso.mp4";
 //        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso (Big Android BBQ 2015).mp4";
-        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
-        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video2.mp4";
-        String path3 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video3.mp4";
-        String path4 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video4.mp4";
-        String path5 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video5.mp4";
+        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "front.mp4";
+        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "right.mp4";
+        String path3 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "back.mp4";
+        String path4 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "left.mp4";
 //        File file = new File(uri.toString());
 //        boolean isExist = file.exists();
 //        String videoPath = file.getAbsolutePath();
@@ -126,15 +125,10 @@ public class ResultActivity extends AppCompatActivity {
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", uri.toString())));
 //        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", uri.toString())));
 
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 1", path1)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 2", path2)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 3", path3)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 4", path4)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 5", path5)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 6", path1)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 7", path2)));
-        urlPath.add(new Video(VideoPreviewFragment.newInstance("video 8", path3)));
-
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("front", path1)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("right", path2)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("back", path3)));
+        urlPath.add(new Video(VideoPreviewFragment.newInstance("left", path4)));
 
         media.setVideos(urlPath);
     }
