@@ -99,7 +99,7 @@ public class ResultActivity extends AppCompatActivity {
 //        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso.mp4";
 //        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso (Big Android BBQ 2015).mp4";
 //        //4k 17:9, 12fps   // NOT WORKING
-        String name1 = "4k-17|9 12fps";
+        String name1 = "4k-17|9 12fps.mp4";
         String name2 = name1;
         String name3 = name1;
 
