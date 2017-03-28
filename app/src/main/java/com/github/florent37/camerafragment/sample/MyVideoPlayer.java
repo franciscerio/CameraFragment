@@ -21,6 +21,9 @@ public class MyVideoPlayer extends JCVideoPlayerStandard {
     @Override
     public void init(Context context) {
         super.init(context);
+//        widthRatio = 17;
+//        heightRatio = 9;
+
         backButton.setVisibility(View.GONE);
         thumbImageView.setVisibility(View.GONE);
         tinyBackImageView.setVisibility(View.GONE);
@@ -45,6 +48,7 @@ public class MyVideoPlayer extends JCVideoPlayerStandard {
     @Override
     public void onError(int what, int extra) {
         super.onError(what, extra);
+
     }
 
 

@@ -98,10 +98,75 @@ public class ResultActivity extends AppCompatActivity {
 //        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "video1.mp4";
 //        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso.mp4";
 //        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "Advanced Android Espresso (Big Android BBQ 2015).mp4";
-        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "front.mp4";
-        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "right.mp4";
-        String path3 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "back.mp4";
-        String path4 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + "left.mp4";
+//        //4k 17:9, 12fps   // NOT WORKING
+        String name1 = "4k-17|9 12fps";
+        String name2 = name1;
+        String name3 = name1;
+
+
+//        //4k 15fps      // WORKING
+//        String name1= "4k15fps.mp4";
+//        String name2= name1;
+//        String name3= name1;
+
+//        //2.7k 17:9 24fps  // WORKING
+//        String name1 = "2|7k-17|9-24fps.mp4";
+//        String name2 = name1;
+//        String name3 = name1;
+
+//        //2.7k 30fps         // WORKING
+//        String name1 = "2|7k-30fps.mp4";
+//        String name2 = name1;
+//        String name3 = name1;
+
+        //1440 24fps        // WORKING
+//        String name1 = "1440-24fps.mp4";
+//        String name2 = name1;
+//        String name3 = name1;
+
+        //1440 30fps        // WORKING
+//        String name1 = "1440-30fps.mp4";
+//        String name2 = name1;
+//        String name3 = name1;
+
+        //1440 48fps        // WORKING
+//        String name1 = "1440-48fps.mp4";
+//        String name2 = name1;
+//        String name3 = name1;
+
+        //1080 Super 24fps to 60fps   //WORKING
+//        String name1 = "1080Super-24fps.mp4";
+//        String name2 = name1;
+//        String name3 = name1;
+//        String name4 = "name1";
+
+//        //1080 24fps to 60fps       //WORKING
+//        String name1 = "1080-24fps.mp4";
+//        String name2 = "1080-30fps.mp4";
+//        String name3 = "1080-48fps.mp4";
+//        String name4 = "1080-60fps.mp4";
+
+        //960 48fps to 100fps       //WORKING
+//        String name1 = "960-48fps.mp4";
+//        String name2 = "960-60fps.mp4";
+//        String name3 = "960-100fps.mp4";
+//        String name4 = "1080-60fps.mp4";
+
+        //720 Super 48fps to 100fps       //WORKING
+//        String name1 = "720Super-48fps.mp4";
+//        String name2 = "720Super-60fps.mp4";
+//        String name3 = "720Super-100fps.mp4";
+
+        //720 60fps to 100fps       //WORKING
+//        String name1 = "720-60fps.mp4";
+//        String name2 = "720-100fps.mp4";
+//        String name3 = "WVGA-240fps.mp4";
+
+
+        String path1 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + name1;
+        String path2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + name2;
+        String path3 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + name3;
+        String path4 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separator + name1;
 //        File file = new File(uri.toString());
 //        boolean isExist = file.exists();
 //        String videoPath = file.getAbsolutePath();
